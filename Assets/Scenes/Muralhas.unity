@@ -23860,7 +23860,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7757401058175354129}
-  - component: {fileID: 8684026370165414882}
   - component: {fileID: 8684026370165414879}
   - component: {fileID: 8684026370165414881}
   - component: {fileID: 8684026370165414880}
@@ -24587,33 +24586,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.008597877, y: 0.0042397925, z: 0.018481161}
   m_Center: {x: -0.000007385356, y: 0.00012815093, z: 0.009240579}
---- !u!114 &8684026370165414882
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6905863623725843959}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4dd4d467058b4004695b27b18b82ca60, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  vidaAtual: 0
-  vida: 100
-  ataque: 0
-  velocidade: 0
-  forcaPulo: 0
-  ouro: 0
-  temChave: 0
-  pegando: 0
-  podePegar: 0
-  animator: {fileID: 0}
-  estaVivo: 1
-  inventario: []
-  pulo: {fileID: 0}
-  queda: {fileID: 0}
-  corte: {fileID: 0}
 --- !u!54 &8684026370165414883
 Rigidbody:
   m_ObjectHideFlags: 0
