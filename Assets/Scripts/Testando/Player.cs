@@ -97,27 +97,40 @@ public class Player : MonoBehaviour
             animator.SetBool("Andar", true);
             animator.SetBool("AndarParaTras", false);
             Walk(1); // Anda para frente
+            animator.SetBool("EstaParado",false);
         }
         else if (Input.GetKey(KeyCode.S))
         {
             animator.SetBool("AndarParaTras", true);
             animator.SetBool("Andar", false);
             Walk(-1); // Anda para trás
+           
         }
         else if (Input.GetKey(KeyCode.A))
         {
             animator.SetBool("Andar", true);
             Walk(1); // Anda para a esquerda
+            animator.SetBool("EstaParado",false);
         }
         else if (Input.GetKey(KeyCode.D))
         {
             animator.SetBool("Andar", true);
             Walk(1); // Anda para a direita
+            animator.SetBool("EstaParado",false);
         }
         else
         {
             animator.SetBool("Andar", false);
             animator.SetBool("AndarParaTras", false);
+            animator.SetBool("EstaParado",true);
+        }
+        if(Input.GetKey(KeyCode.H))
+        {
+            animator.SetBool("SocoEsquerda",true);
+           /* if(Input.GetKeyDown(KeyCode.H) && Input.GetKeyDown(KeyCode.H) )
+            {
+                animator.SetTrigger("SocoDireita");
+            }*/
         }
     }
 
