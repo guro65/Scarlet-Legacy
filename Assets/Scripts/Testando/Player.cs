@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public int VidaAtual { get { return vidaAtual; } }
-    public int VidaMaxima { get { return vida; } }
-    [SerializeField] private int vidaAtual;
-    [SerializeField] private int vida = 100;
+    public float VidaAtualPercentual { get { return vidaAtual / vidaMaxima * 100; } } // Vida atual como porcentagem
+    public float VidaMaxima { get { return vidaMaxima; } }
+    [SerializeField] private float vidaAtual = 100f; // Vida atual em valores absolutos
+    [SerializeField] private float vidaMaxima = 100f; // Vida máxima
     [SerializeField] private float ataque;
     [SerializeField] private float velocidade;
     [SerializeField] private Animator animator;
@@ -26,7 +26,7 @@ public class Player : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
-        vidaAtual = vida;
+        vidaAtual = vidaMaxima; // Inicializa a vida em 100%
     }
 
     void Update()
@@ -34,6 +34,9 @@ public class Player : MonoBehaviour
         DetectarDuploToque();
         VerificarMovimento();
         RotacaoContinua(); // Chamando o método para rotação contínua
+
+        // Debug para mostrar a vida atual em porcentagem
+        Debug.Log($"Vida Atual: {VidaAtualPercentual}%");
     }
 
     void DetectarDuploToque()
@@ -97,40 +100,19 @@ public class Player : MonoBehaviour
             animator.SetBool("Andar", true);
             animator.SetBool("AndarParaTras", false);
             Walk(1); // Anda para frente
-            animator.SetBool("EstaParado",false);
+            animator.SetBool("EstaParado", false);
         }
         else if (Input.GetKey(KeyCode.S))
         {
             animator.SetBool("AndarParaTras", true);
             animator.SetBool("Andar", false);
             Walk(-1); // Anda para trás
-           
-        }
-        else if (Input.GetKey(KeyCode.A))
-        {
-            animator.SetBool("Andar", true);
-            Walk(1); // Anda para a esquerda
-            animator.SetBool("EstaParado",false);
-        }
-        else if (Input.GetKey(KeyCode.D))
-        {
-            animator.SetBool("Andar", true);
-            Walk(1); // Anda para a direita
-            animator.SetBool("EstaParado",false);
         }
         else
         {
             animator.SetBool("Andar", false);
             animator.SetBool("AndarParaTras", false);
-            animator.SetBool("EstaParado",true);
-        }
-        if(Input.GetKey(KeyCode.H))
-        {
-            animator.SetBool("SocoEsquerda",true);
-           /* if(Input.GetKeyDown(KeyCode.H) && Input.GetKeyDown(KeyCode.H) )
-            {
-                animator.SetTrigger("SocoDireita");
-            }*/
+            animator.SetBool("EstaParado", true);
         }
     }
 
@@ -158,4 +140,22 @@ public class Player : MonoBehaviour
         Vector3 novaPosicao = rb.position + moveDirection * Time.deltaTime;
         rb.MovePosition(novaPosicao);
     }
+
+    // Método para regenerar a vida em porcentagem
+    public void RegenerarVida(float porcentagem)
+    {
+        if (!estaVivo) return;
+
+        float vidaParaAdicionar = vidaMaxima * porcentagem;
+        vidaAtual = Mathf.Min(vidaAtual + vidaParaAdicionar, vidaMaxima);
+        Debug.Log($"Regenerou {vidaParaAdicionar} de vida! Vida atual: {VidaAtualPercentual}%");
+    }
+
+    public void AumentarVida(float quantidade)
+    {
+        vidaAtual = Mathf.Min(vidaAtual + quantidade, vidaMaxima); // Garante que não ultrapasse o máximo
+    }
+
 }
+
+
