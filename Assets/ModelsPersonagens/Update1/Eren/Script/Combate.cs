@@ -13,6 +13,8 @@ public class Habilidade
     public int dano = 0; // Dano causado pela habilidade (0 para habilidades como regeneração)
     public KeyCode teclaAtivacao; // Tecla para ativar a habilidade
     public string animacao; // Nome da animação a ser ativada
+    public float porcentagemRegeneracao = 0.15f; // Porcentagem de vida que será regenerada (15% por padrão)
+    public bool isDespertar = false; // Verifica se a habilidade é de despertar
 }
 
 public class Combate : MonoBehaviour
@@ -57,29 +59,12 @@ public class Combate : MonoBehaviour
         }
         if (cameraAnimacao != null)
         {
-            cameraAnimacao.enabled = false;
+            cameraAnimacao.enabled = false; // Câmera de animação começa desativada
         }
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            if (alternarSoco)
-            {
-                // Ativa a animação de SocoEsquerdo
-                animator.SetTrigger("SocoEsquerdo");
-            }
-            else
-            {
-                // Ativa a animação de SocoDireito
-                animator.SetTrigger("SocoDireito");
-            }
-
-            // Alterna para o próximo soco
-            alternarSoco = !alternarSoco;
-        }
-
         // Verifica se uma tecla associada a uma habilidade foi pressionada
         for (int i = 0; i < habilidades.Count; i++)
         {
@@ -122,7 +107,7 @@ public class Combate : MonoBehaviour
                 break;
 
             case 2: // Camada 2 - Regeneração
-                RegenerarVida(0.15f); // Regenera 15% da vida
+                RegenerarVida(habilidade.porcentagemRegeneracao); // Usa a porcentagem definida para regeneração
                 if (habilidade.prefab != null)
                 {
                     Instantiate(habilidade.prefab, transform.position, Quaternion.identity);
@@ -130,7 +115,10 @@ public class Combate : MonoBehaviour
                 break;
 
             case 3: // Camada 3 - Despertar
-                yield return StartCoroutine(ExecutarDespertar());
+                if (habilidade.isDespertar)
+                {
+                    yield return StartCoroutine(ExecutarDespertar());
+                }
                 break;
         }
 
@@ -153,17 +141,25 @@ public class Combate : MonoBehaviour
         }
     }
 
-
     private IEnumerator ExecutarDespertar()
     {
-        // Troca para a câmera de animação
+        // Ativa a câmera de animação e desativa a câmera principal
         if (cameraAnimacao != null && cameraPrincipal != null)
         {
             cameraPrincipal.enabled = false;
             cameraAnimacao.enabled = true;
 
+            // Inicia a animação de despertar do personagem
+            animator.SetBool("isDespertando", true); // Ativa a animação de despertar (use o nome exato do parâmetro booleana no Animator)
+
+            // Executa a animação de despertar
+            if (animator != null && !string.IsNullOrEmpty(habilidades[3].animacao)) // Se for uma habilidade de despertar
+            {
+                animator.SetTrigger(habilidades[3].animacao); // Ativa a animação
+            }
+
             // Aguarda a conclusão da animação (ajuste o tempo conforme necessário)
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(3f); // Aguarda a duração da animação de despertar
 
             // Substitui o prefab do player
             if (playerPrefabNovo != null)
@@ -174,9 +170,12 @@ public class Combate : MonoBehaviour
                 Instantiate(playerPrefabNovo, posicaoAtual, rotacaoAtual); // Instancia o novo prefab
             }
 
-            // Retorna à câmera principal
+            // Retorna à câmera principal e desativa a câmera de animação
             cameraAnimacao.enabled = false;
             cameraPrincipal.enabled = true;
+
+            // Desativa a animação de despertar
+            animator.SetBool("isDespertando", false); // Desativa a animação de despertar
         }
     }
 
