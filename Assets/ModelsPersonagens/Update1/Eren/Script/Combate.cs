@@ -65,6 +65,23 @@ public class Combate : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            if (alternarSoco)
+            {
+                // Ativa a animação de SocoEsquerdo
+                animator.SetTrigger("SocoEsquerdo");
+            }
+            else
+            {
+                // Ativa a animação de SocoDireito
+                animator.SetTrigger("SocoDireito");
+            }
+
+            // Alterna para o próximo soco
+            alternarSoco = !alternarSoco;
+        }
+
         // Verifica se uma tecla associada a uma habilidade foi pressionada
         for (int i = 0; i < habilidades.Count; i++)
         {
@@ -73,6 +90,7 @@ public class Combate : MonoBehaviour
                 AtivarHabilidade(i);
             }
         }
+
     }
 
     public void AtivarHabilidade(int indice)
