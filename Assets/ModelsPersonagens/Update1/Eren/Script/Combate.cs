@@ -90,7 +90,6 @@ public class Combate : MonoBehaviour
                 AtivarHabilidade(i);
             }
         }
-
     }
 
     public void AtivarHabilidade(int indice)
@@ -166,34 +165,31 @@ public class Combate : MonoBehaviour
         {
             cameraPrincipal.enabled = false;
             cameraAnimacao.enabled = true;
+        }
 
-            // Inicia a animação de despertar do personagem
-            animator.SetBool("isDespertando", true); // Ativa a animação de despertar (use o nome exato do parâmetro booleana no Animator)
+        // Inicia a animação de despertar
+        if (animator != null)
+        {
+            animator.SetTrigger("Despertar"); // Usa o trigger "Despertar"
+        }
 
-            // Executa a animação de despertar
-            if (animator != null && !string.IsNullOrEmpty(habilidades[3].animacao)) // Se for uma habilidade de despertar
-            {
-                animator.SetTrigger(habilidades[3].animacao); // Ativa a animação
-            }
+        // Aguarda a conclusão da animação (ajuste o tempo conforme necessário)
+        yield return new WaitForSeconds(3f); // Tempo da animação
 
-            // Aguarda a conclusão da animação (ajuste o tempo conforme necessário)
-            yield return new WaitForSeconds(3f); // Aguarda a duração da animação de despertar
+        // Substitui o prefab do player
+        if (playerPrefabNovo != null)
+        {
+            Vector3 posicaoAtual = transform.position;
+            Quaternion rotacaoAtual = transform.rotation;
+            Destroy(gameObject); // Destroi o player atual
+            Instantiate(playerPrefabNovo, posicaoAtual, rotacaoAtual); // Instancia o novo prefab
+        }
 
-            // Substitui o prefab do player
-            if (playerPrefabNovo != null)
-            {
-                Vector3 posicaoAtual = transform.position;
-                Quaternion rotacaoAtual = transform.rotation;
-                Destroy(gameObject); // Destroi o player atual
-                Instantiate(playerPrefabNovo, posicaoAtual, rotacaoAtual); // Instancia o novo prefab
-            }
-
-            // Retorna à câmera principal e desativa a câmera de animação
+        // Retorna à câmera principal e desativa a câmera de animação
+        if (cameraAnimacao != null && cameraPrincipal != null)
+        {
             cameraAnimacao.enabled = false;
             cameraPrincipal.enabled = true;
-
-            // Desativa a animação de despertar
-            animator.SetBool("isDespertando", false); // Desativa a animação de despertar
         }
     }
 
