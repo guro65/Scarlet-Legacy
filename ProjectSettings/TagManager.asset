@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Spawn1
   - Spawn2
+  - Chao
   layers:
   - Default
   - TransparentFX
