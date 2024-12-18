@@ -13,7 +13,6 @@ public class InimigoBoss : MonoBehaviour
     [SerializeField] private float velocidadeEspecial = 7.0f;
     [SerializeField] private float tempoAntesDoEspecial = 2.0f;
     private bool estaVivo = true;
-    private bool estaAcordado = false;
     private Animator animator;
     private Vector3 ultimaPosicaoConhecida;
     private bool playerNaAreaDeAtaque;
@@ -27,7 +26,7 @@ public class InimigoBoss : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         player = GameObject.FindWithTag("Player");
-        estaAcordado = true;
+        
     }
 
     // Update is called once per frame
@@ -40,9 +39,9 @@ public class InimigoBoss : MonoBehaviour
         }
 
         // Calcula a distância entre o boss e o jogador
-        float distanciaAtePlayer = Vector3.Distance(transform.position,transform.position);
+        float distanciaAtePlayer = Vector3.Distance(transform.position, player.transform.position);
 
-        if(estaVivo && estaAcordado)
+        if(estaVivo)
         {
             // Faz o boss olhar sempre na direção do jogador
             OlhaParaOPlayer();
@@ -51,7 +50,7 @@ public class InimigoBoss : MonoBehaviour
             {
                 //Ataque normal se estiver próximo
                 playerNaAreaDeAtaque = true;
-                //Ataque();
+                Ataque();
             }
             else if (distanciaAtePlayer <= distanciaDeteccao)
             {
@@ -63,7 +62,7 @@ public class InimigoBoss : MonoBehaviour
             else if (!playerNaAreaDeAtaque && podeUsarAtaqueEspecial)
             {
                 //Ataque especial se o player estiver fora do alcance
-                //AtaqueEspecial();
+                AtaqueEspecial();
             }
         }
         
@@ -122,11 +121,6 @@ public class InimigoBoss : MonoBehaviour
     {
         Debug.Log("Colisão com " + collision.gameObject.name);
 
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            Despertar();
-        }
-
         if (collision.gameObject.CompareTag("Player") && ataqueEspecialAtivo)
         {
             Atacar(collision.gameObject.GetComponent<Player>(), 30);
@@ -169,11 +163,7 @@ public class InimigoBoss : MonoBehaviour
         Invoke("Destruir", 4.0f);
     }
 
-    public void Despertar()
-    {
-        animator.SetTrigger("Surgir");
-        estaAcordado = true;
-    }
+   
 
     private void Destruir()
     {
