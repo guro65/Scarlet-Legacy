@@ -1,6 +1,7 @@
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class InimigoBoss : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class InimigoBoss : MonoBehaviour
     private bool podeUsarAtaqueEspecial = true;
     private bool ataqueEspecialAtivo = false;
     private bool ataqueNormalAtivo = false;
+    private bool taOff;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -26,6 +28,7 @@ public class InimigoBoss : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         player = GameObject.FindWithTag("Player");
+        animator.SetBool("Andar",true);
         
     }
 
@@ -50,6 +53,7 @@ public class InimigoBoss : MonoBehaviour
             {
                 //Ataque normal se estiver próximo
                 playerNaAreaDeAtaque = true;
+                taOff = true;
                 Ataque();
             }
             else if (distanciaAtePlayer <= distanciaDeteccao)
@@ -57,6 +61,7 @@ public class InimigoBoss : MonoBehaviour
                 //Player fora do alcance
                 playerNaAreaDeAtaque = false;
                 ultimaPosicaoConhecida = player.transform.position;
+                taOff = false;
                 MoverAteOPlayer();
             }
             else if (!playerNaAreaDeAtaque && podeUsarAtaqueEspecial)
@@ -82,6 +87,7 @@ public class InimigoBoss : MonoBehaviour
     {
         animator.SetBool("Andar", false);
         StartCoroutine(AtaqueNormalAtivado());
+        ParadeSeMover();
     }
 
     IEnumerator AtaqueNormalAtivado()
@@ -89,6 +95,7 @@ public class InimigoBoss : MonoBehaviour
         yield return new WaitForSeconds(3.0f);
      
         animator.SetTrigger("Ataque");
+        ParadeSeMover();
 
         StopAllCoroutines();
     }
@@ -107,14 +114,32 @@ public class InimigoBoss : MonoBehaviour
     }
 
     private void MoverAteOPlayer()
-    {
-        animator.SetBool("Andar", true);
-        animator.SetBool("Especial", false);
-
+    { 
         // Move o boss até a última posição conhecida do jogador
         Vector3 direcao = (ultimaPosicaoConhecida - transform.position).normalized;
-
+        animator.SetBool("Andar", true);
         transform.position += direcao * velocidade * Time.deltaTime;
+        animator.SetBool("Especial", false);
+        animator.SetBool("Ataque", false);
+        VoltarASeguir();
+ 
+    }
+
+    private void ParadeSeMover()
+    {
+        if(taOff ==true)
+        animator.SetBool("Andar",false);
+        animator.SetBool("PodeAtacar",true);
+        velocidade = 0;
+    }
+    private void VoltarASeguir()
+    {
+        if(taOff == false)
+        animator.SetBool("Andar",true);
+        animator.SetBool("PodeAtacar",false);
+        new WaitForSeconds(9);
+        velocidade = 5;
+         
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -124,15 +149,18 @@ public class InimigoBoss : MonoBehaviour
         if (collision.gameObject.CompareTag("Player") && ataqueEspecialAtivo)
         {
             Atacar(collision.gameObject.GetComponent<Player>(), 30);
+            animator.SetBool("Andar", false);
         }
 
         if (collision.gameObject.CompareTag("Player") && playerNaAreaDeAtaque)
         {
             Atacar(collision.gameObject.GetComponent<Player>(), 10);
+            animator.SetBool("Andar", false);
         }
 
         
     }
+   
 
     private void OnTriggerEnter(Collider other)
     {
