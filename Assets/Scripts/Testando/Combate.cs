@@ -15,7 +15,9 @@ public class Habilidade
     public string animacao; // Nome da animação a ser ativada
     public float porcentagemRegeneracao = 0.15f; // Porcentagem de vida que será regenerada (15% por padrão)
     public bool isDespertar = false; // Verifica se a habilidade é de despertar
+    public Transform posicaoSpawn; // Posição onde o prefab será gerado
 }
+
 
 public class Combate : MonoBehaviour
 {
@@ -118,7 +120,10 @@ public class Combate : MonoBehaviour
             case 1: // Camada 1 - Estaca
                 if (habilidade.prefab != null)
                 {
-                    GameObject prefabInstanciado = Instantiate(habilidade.prefab, transform.position, Quaternion.identity);
+                    Vector3 posicaoPrefab = habilidade.posicaoSpawn != null
+                        ? habilidade.posicaoSpawn.position
+                        : transform.position; // Usa a posição do spawn ou a posição do jogador
+                    GameObject prefabInstanciado = Instantiate(habilidade.prefab, posicaoPrefab, Quaternion.identity);
                     Destroy(prefabInstanciado, 5f); // Destroi o prefab após 5 segundos
                 }
                 break;
@@ -127,7 +132,10 @@ public class Combate : MonoBehaviour
                 RegenerarVida(habilidade.porcentagemRegeneracao); // Usa a porcentagem definida para regeneração
                 if (habilidade.prefab != null)
                 {
-                    Instantiate(habilidade.prefab, transform.position, Quaternion.identity);
+                    Vector3 posicaoPrefab = habilidade.posicaoSpawn != null
+                        ? habilidade.posicaoSpawn.position
+                        : transform.position; // Usa a posição do spawn ou a posição do jogador
+                    Instantiate(habilidade.prefab, posicaoPrefab, Quaternion.identity);
                 }
                 break;
 
@@ -146,6 +154,7 @@ public class Combate : MonoBehaviour
         yield return new WaitForSeconds(habilidade.cooldownTempo);
         habilidadesDisponiveis[indice] = true;
     }
+
 
     private void RegenerarVida(float porcentagem)
     {
