@@ -13,6 +13,8 @@ public class InimigoBoss : MonoBehaviour
     [SerializeField] private float velocidade = 5.0f;
     [SerializeField] private float velocidadeEspecial = 7.0f;
     [SerializeField] private float tempoAntesDoEspecial = 2.0f;
+    [SerializeField] private float paraDeSeguirDistancia = 3f;
+    [SerializeField] private bool estaSeguindo;
     private bool estaVivo = true;
     private Animator animator;
     private Vector3 ultimaPosicaoConhecida;
@@ -20,7 +22,7 @@ public class InimigoBoss : MonoBehaviour
     private bool podeUsarAtaqueEspecial = true;
     private bool ataqueEspecialAtivo = false;
     private bool ataqueNormalAtivo = false;
-    private bool taOff;
+    private bool pausaParaAndar;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -29,6 +31,7 @@ public class InimigoBoss : MonoBehaviour
         animator = GetComponent<Animator>();
         player = GameObject.FindWithTag("Player");
         animator.SetBool("Andar",true);
+        estaSeguindo = false;
         
     }
 
@@ -39,6 +42,11 @@ public class InimigoBoss : MonoBehaviour
         if (ataqueEspecialAtivo)
         {
             return;
+        }
+         if (estaSeguindo)
+        {
+            animator.SetBool("EstaParado", false);
+            MoverAteOPlayer();
         }
 
         // Calcula a distância entre o boss e o jogador
@@ -53,7 +61,6 @@ public class InimigoBoss : MonoBehaviour
             {
                 //Ataque normal se estiver próximo
                 playerNaAreaDeAtaque = true;
-                taOff = true;
                 Ataque();
             }
             else if (distanciaAtePlayer <= distanciaDeteccao)
@@ -61,8 +68,8 @@ public class InimigoBoss : MonoBehaviour
                 //Player fora do alcance
                 playerNaAreaDeAtaque = false;
                 ultimaPosicaoConhecida = player.transform.position;
-                taOff = false;
                 MoverAteOPlayer();
+                animator.SetBool("Andar", true);
             }
             else if (!playerNaAreaDeAtaque && podeUsarAtaqueEspecial)
             {
@@ -86,8 +93,8 @@ public class InimigoBoss : MonoBehaviour
     private void Ataque()
     {
         animator.SetBool("Andar", false);
-        StartCoroutine(AtaqueNormalAtivado());
         ParadeSeMover();
+        StartCoroutine(AtaqueNormalAtivado());
     }
 
     IEnumerator AtaqueNormalAtivado()
@@ -95,8 +102,6 @@ public class InimigoBoss : MonoBehaviour
         yield return new WaitForSeconds(3.0f);
      
         animator.SetTrigger("Ataque");
-        ParadeSeMover();
-
         StopAllCoroutines();
     }
 
@@ -117,29 +122,42 @@ public class InimigoBoss : MonoBehaviour
     { 
         // Move o boss até a última posição conhecida do jogador
         Vector3 direcao = (ultimaPosicaoConhecida - transform.position).normalized;
-        animator.SetBool("Andar", true);
+        
+        if(Vector3.Distance(player.transform.position, transform.position) <= paraDeSeguirDistancia )
+        {
         transform.position += direcao * velocidade * Time.deltaTime;
+        animator.SetBool("Andar", true);
         animator.SetBool("Especial", false);
-        animator.SetBool("Ataque", false);
-        VoltarASeguir();
- 
+        estaSeguindo = false;
+        }
+        
+        
+        if (direcao != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(direcao);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
+            animator.SetBool("Andar", true);
+            estaSeguindo = true;
+        }
+        else
+        {
+            estaSeguindo = false;
+            animator.SetBool("Andar", false);
+        }
     }
 
     private void ParadeSeMover()
     {
-        if(taOff ==true)
+        if(pausaParaAndar ==true)
         animator.SetBool("Andar",false);
         animator.SetBool("PodeAtacar",true);
-        velocidade = 0;
+        
     }
     private void VoltarASeguir()
     {
-        if(taOff == false)
+        if(pausaParaAndar == false)
         animator.SetBool("Andar",true);
-        animator.SetBool("PodeAtacar",false);
-        new WaitForSeconds(9);
-        velocidade = 5;
-         
+        animator.SetBool("PodeAtacar",false);   
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -200,7 +218,7 @@ public class InimigoBoss : MonoBehaviour
 
     private void Atacar(Player player, int dano)
     {
-        //Ataque();
+        Ataque();
         //player.TomarDano(dano);
     }
 
