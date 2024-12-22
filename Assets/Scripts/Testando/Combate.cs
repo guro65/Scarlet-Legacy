@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static Combate;
 
 [System.Serializable]
 public class Habilidade
@@ -10,14 +11,13 @@ public class Habilidade
     public Image cooldownImagem; // Imagem de cooldown
     public GameObject prefab; // Prefab associado à habilidade
     public float cooldownTempo = 10f; // Tempo de cooldown
-    public int dano = 0; // Dano causado pela habilidade (0 para habilidades como regeneração)
+    public int dano = 0; // Dano causado pela habilidade
     public KeyCode teclaAtivacao; // Tecla para ativar a habilidade
     public string animacao; // Nome da animação a ser ativada
-    public float porcentagemRegeneracao = 0.15f; // Porcentagem de vida que será regenerada (15% por padrão)
+    public float porcentagemRegeneracao = 0.15f; // Porcentagem de vida regenerada
     public bool isDespertar = false; // Verifica se a habilidade é de despertar
-    public Transform posicaoSpawn; // Posição onde o prefab será gerado
+    public PontoSpawn pontoSpawn; // Onde o prefab será gerado
 }
-
 
 public class Combate : MonoBehaviour
 {
@@ -27,15 +27,22 @@ public class Combate : MonoBehaviour
 
     [Header("Configuração das Habilidades")]
     public List<Habilidade> habilidades; // Lista de habilidades
+    public enum PontoSpawn
+    {
+        ProprioPlayer, // Na posição do próprio player
+        OutroPlayer // Na posição do oponente
+    }
+
+    [Header("Configuração do Personagem")]
+    public GameObject personagemPrefab; // Prefab do personagem atual
+    public Transform spawnPonto; // Ponto onde o personagem será gerado
 
     [Header("Configuração da Câmera")]
     public Camera cameraPrincipal; // Câmera do jogador
     public Camera cameraAnimacao; // Câmera usada na animação de despertar
-    public GameObject playerPrefabNovo; // Prefab do player após a transformação
 
     void Start()
     {
-        // Obtém o componente Animator do GameObject
         animator = GetComponent<Animator>();
 
         if (animator == null)
@@ -43,7 +50,6 @@ public class Combate : MonoBehaviour
             Debug.LogError("Animator não encontrado! Certifique-se de que o componente Animator está anexado.");
         }
 
-        // Inicializa as habilidades como disponíveis
         habilidadesDisponiveis = new bool[habilidades.Count];
         for (int i = 0; i < habilidades.Count; i++)
         {
@@ -54,15 +60,16 @@ public class Combate : MonoBehaviour
             }
         }
 
-        // Garante que a câmera principal esteja ativa no início
         if (cameraPrincipal != null)
         {
             cameraPrincipal.enabled = true;
         }
         if (cameraAnimacao != null)
         {
-            cameraAnimacao.enabled = false; // Câmera de animação começa desativada
+            cameraAnimacao.enabled = false;
         }
+
+        GerarPersonagemComHabilidades();
     }
 
     void Update()
@@ -87,7 +94,8 @@ public class Combate : MonoBehaviour
         // Verifica se uma tecla associada a uma habilidade foi pressionada
         for (int i = 0; i < habilidades.Count; i++)
         {
-            if (Input.GetKeyDown(habilidades[i].teclaAtivacao))
+            // Verifica se a tecla foi pressionada e se o cooldown da habilidade terminou
+            if (Input.GetKeyDown(habilidades[i].teclaAtivacao) && habilidadesDisponiveis[i])
             {
                 AtivarHabilidade(i);
             }
@@ -105,6 +113,9 @@ public class Combate : MonoBehaviour
     private IEnumerator ExecutarHabilidade(int indice)
     {
         Habilidade habilidade = habilidades[indice];
+        if (!habilidadesDisponiveis[indice])
+            yield break;
+
         habilidadesDisponiveis[indice] = false;
 
         // Ativa a animação da habilidade
@@ -113,48 +124,38 @@ public class Combate : MonoBehaviour
             animator.SetTrigger(habilidade.animacao);
         }
 
-        // Efeitos específicos para cada camada
-        switch (indice)
+        // Gera o prefab e define sua destruição após 5 segundos
+        if (habilidade.prefab != null)
         {
-            case 0: // Camada 0 - Espinhos
-            case 1: // Camada 1 - Estaca
-                if (habilidade.prefab != null)
-                {
-                    Vector3 posicaoPrefab = habilidade.posicaoSpawn != null
-                        ? habilidade.posicaoSpawn.position
-                        : transform.position; // Usa a posição do spawn ou a posição do jogador
-                    GameObject prefabInstanciado = Instantiate(habilidade.prefab, posicaoPrefab, Quaternion.identity);
-                    Destroy(prefabInstanciado, 5f); // Destroi o prefab após 5 segundos
-                }
-                break;
-
-            case 2: // Camada 2 - Regeneração
-                RegenerarVida(habilidade.porcentagemRegeneracao); // Usa a porcentagem definida para regeneração
-                if (habilidade.prefab != null)
-                {
-                    Vector3 posicaoPrefab = habilidade.posicaoSpawn != null
-                        ? habilidade.posicaoSpawn.position
-                        : transform.position; // Usa a posição do spawn ou a posição do jogador
-                    Instantiate(habilidade.prefab, posicaoPrefab, Quaternion.identity);
-                }
-                break;
-
-            case 3: // Camada 3 - Despertar
-                if (habilidade.isDespertar)
-                {
-                    yield return StartCoroutine(ExecutarDespertar());
-                }
-                break;
+            Vector3 posicaoPrefab = DeterminarPosicaoSpawn(habilidade.pontoSpawn);
+            GameObject prefabInstanciado = Instantiate(habilidade.prefab, posicaoPrefab, Quaternion.identity);
+            Destroy(prefabInstanciado, 5f); // Destroi o prefab após 5 segundos
         }
 
-        // Inicia o cooldown visual
         StartCoroutine(AtualizarCooldownVisual(habilidade.cooldownImagem, habilidade.cooldownTempo));
-
-        // Aguarda o tempo de cooldown para liberar a habilidade novamente
+        // Aguarda o tempo de cooldown
         yield return new WaitForSeconds(habilidade.cooldownTempo);
+        // Habilidade está disponível novamente
         habilidadesDisponiveis[indice] = true;
     }
 
+    private Vector3 DeterminarPosicaoSpawn(PontoSpawn pontoSpawn)
+    {
+        GameObject playerAtual = gameObject;
+        GameObject outroPlayer = GameObject.FindWithTag(playerAtual.CompareTag("Player 1") ? "Player 2" : "Player 1");
+
+        if (pontoSpawn == PontoSpawn.ProprioPlayer)
+        {
+            return playerAtual.transform.position;
+        }
+        else if (pontoSpawn == PontoSpawn.OutroPlayer && outroPlayer != null)
+        {
+            return outroPlayer.transform.position;
+        }
+
+        Debug.LogWarning("Não foi possível determinar a posição de spawn. Usando posição padrão.");
+        return transform.position; // Posição padrão caso algo dê errado
+    }
 
     private void RegenerarVida(float porcentagem)
     {
@@ -167,39 +168,28 @@ public class Combate : MonoBehaviour
         }
     }
 
-    private IEnumerator ExecutarDespertar()
+    private void GerarPersonagemComHabilidades()
     {
-        // Ativa a câmera de animação e desativa a câmera principal
-        if (cameraAnimacao != null && cameraPrincipal != null)
+        if (personagemPrefab != null && spawnPonto != null)
         {
-            cameraPrincipal.enabled = false;
-            cameraAnimacao.enabled = true;
-        }
+            Instantiate(personagemPrefab, spawnPonto.position, spawnPonto.rotation);
 
-        // Inicia a animação de despertar
-        if (animator != null)
-        {
-            animator.SetTrigger("Despertar"); // Usa o trigger "Despertar"
+            foreach (var habilidade in habilidades)
+            {
+                if (habilidade.prefab != null)
+                {
+                    habilidade.prefab = ObterPrefabPorPersonagem(habilidade.nome);
+                }
+            }
         }
+    }
 
-        // Aguarda a conclusão da animação (ajuste o tempo conforme necessário)
-        yield return new WaitForSeconds(3f); // Tempo da animação
-
-        // Substitui o prefab do player
-        if (playerPrefabNovo != null)
-        {
-            Vector3 posicaoAtual = transform.position;
-            Quaternion rotacaoAtual = transform.rotation;
-            Destroy(gameObject); // Destroi o player atual
-            Instantiate(playerPrefabNovo, posicaoAtual, rotacaoAtual); // Instancia o novo prefab
-        }
-
-        // Retorna à câmera principal e desativa a câmera de animação
-        if (cameraAnimacao != null && cameraPrincipal != null)
-        {
-            cameraAnimacao.enabled = false;
-            cameraPrincipal.enabled = true;
-        }
+    private GameObject ObterPrefabPorPersonagem(string habilidadeNome)
+    {
+        // Personalize a lógica para selecionar o prefab baseado no personagem
+        // Exemplo: Use um dicionário ou switch-case para retornar o prefab correto
+        Debug.Log($"Obtendo prefab para habilidade: {habilidadeNome}");
+        return null; // Substitua com a lógica para retornar o prefab correto
     }
 
     private IEnumerator AtualizarCooldownVisual(Image cooldownImagem, float cooldownTempo)
@@ -216,7 +206,7 @@ public class Combate : MonoBehaviour
                 yield return null;
             }
 
-            cooldownImagem.fillAmount = 1f; // Reseta para cheia após o cooldown
+            cooldownImagem.fillAmount = 1f;
         }
     }
 }
