@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public class Player : MonoBehaviour
     private float rotacaoAtual = 0f; // Rotação do personagem
     private bool defendendo = false;
 
+    // Referência à barra de vida
+    //[SerializeField] private Image barraVida;
+
     // Variáveis para detectar duplo toque
     private float ultimoToqueW = -1f, ultimoToqueA = -1f, ultimoToqueS = -1f, ultimoToqueD = -1f;
     private float intervaloDuploToque = 0.5f; // Tempo máximo entre os toques
@@ -27,6 +31,12 @@ public class Player : MonoBehaviour
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
         vidaAtual = vidaMaxima; // Inicializa a vida em 100%
+
+        // Verifica se a barra de vida está configurada no Unity
+        /*if (barraVida == null)
+        {
+            Debug.LogError("A barra de vida não está configurada!");
+        }*/
     }
 
     void Update()
@@ -35,9 +45,21 @@ public class Player : MonoBehaviour
         VerificarMovimento();
         RotacaoContinua(); // Chamando o método para rotação contínua
 
+        // Atualiza a barra de vida
+        //AtualizarBarraVida();
+
         // Debug para mostrar a vida atual em porcentagem
-        Debug.Log($"Vida Atual: {VidaAtualPercentual}%");
+        //Debug.Log($"Vida Atual: {VidaAtualPercentual}%");
     }
+
+    // Atualiza a barra de vida conforme a vida atual do jogador
+    /*private void AtualizarBarraVida()
+    {
+        if (barraVida != null)
+        {
+            barraVida.fillAmount = VidaAtualPercentual / 100f; // A barra é uma porcentagem da vida
+        }
+    }*/
 
     void DetectarDuploToque()
     {
@@ -156,6 +178,34 @@ public class Player : MonoBehaviour
         vidaAtual = Mathf.Min(vidaAtual + quantidade, vidaMaxima); // Garante que não ultrapasse o máximo
     }
 
+    public void TomarDano(float dano)
+    {
+        vidaAtual = Mathf.Max(vidaAtual - dano, 0); // Garante que a vida não fique abaixo de zero
+        Debug.Log($"Tomou {dano} de dano! Vida atual: {VidaAtualPercentual}%");
+    }
+
+    public void ReceberDano(int dano)
+    {
+        if (vidaAtual > 0)
+        {
+            vidaAtual -= dano;
+            vidaAtual = Mathf.Max(vidaAtual, 0); // Garante que a vida não fique negativa
+            Debug.Log($"Player recebeu {dano} de dano! Vida atual: {vidaAtual}");
+
+            // Aqui você pode adicionar mais ações, como reproduzir uma animação de dano ou efeito de som
+            // Se a vida do jogador chegar a 0, talvez um sistema de morte seja chamado
+            if (vidaAtual <= 0)
+            {
+                Morrer();
+            }
+        }
+    }
+
+    private void Morrer()
+    {
+        estaVivo = false;
+        animator.SetTrigger("Morte"); // Aciona a animação de morte, se existir
+                                      // Aqui você pode adicionar outras ações ao morrer, como desativar controles ou exibir uma tela de game over
+    }
+
 }
-
-
