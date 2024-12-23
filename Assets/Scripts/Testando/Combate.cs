@@ -17,7 +17,9 @@ public class Habilidade
     public float porcentagemRegeneracao = 0.15f; // Porcentagem de vida regenerada
     public bool isDespertar = false; // Verifica se a habilidade é de despertar
     public PontoSpawn pontoSpawn; // Onde o prefab será gerado
+    public float tempoDeVidaPrefab = 5f; // Tempo de vida do prefab na cena
 }
+
 
 public class Combate : MonoBehaviour
 {
@@ -124,12 +126,17 @@ public class Combate : MonoBehaviour
             animator.SetTrigger(habilidade.animacao);
         }
 
-        // Gera o prefab e define sua destruição após 5 segundos
+        // Gera o prefab e define sua destruição após o tempo configurado
         if (habilidade.prefab != null)
         {
             Vector3 posicaoPrefab = DeterminarPosicaoSpawn(habilidade.pontoSpawn);
             GameObject prefabInstanciado = Instantiate(habilidade.prefab, posicaoPrefab, Quaternion.identity);
-            Destroy(prefabInstanciado, 5f); // Destroi o prefab após 5 segundos
+
+            // Verifica se o tempo de vida foi definido
+            if (habilidade.tempoDeVidaPrefab > 0f)
+            {
+                Destroy(prefabInstanciado, habilidade.tempoDeVidaPrefab); // Destroi o prefab após o tempo configurado
+            }
         }
 
         StartCoroutine(AtualizarCooldownVisual(habilidade.cooldownImagem, habilidade.cooldownTempo));
@@ -138,6 +145,7 @@ public class Combate : MonoBehaviour
         // Habilidade está disponível novamente
         habilidadesDisponiveis[indice] = true;
     }
+
 
     private Vector3 DeterminarPosicaoSpawn(PontoSpawn pontoSpawn)
     {
