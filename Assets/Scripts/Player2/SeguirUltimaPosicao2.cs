@@ -3,13 +3,13 @@ using UnityEngine;
 public class SeguirUltimaPosicao2 : MonoBehaviour
 {
     [SerializeField] private float velocidade = 5f; // Velocidade ajustável no editor
-    private Vector3 posicaoDestino; // Armazena a posição do "Player 2" no momento em que este GameObject foi criado
+    private Vector3 posicaoDestino; // Armazena a posição do "Player" no momento em que este GameObject foi criado
     private bool movendo = false; // Controle para iniciar o movimento
 
     void Start()
     {
-        // Encontra o GameObject com a tag "Player 2"
-        GameObject player = GameObject.FindGameObjectWithTag("Player 2");
+        // Encontra o GameObject com a tag "Player"
+        GameObject player = GameObject.FindGameObjectWithTag("Player 1");
         if (player != null)
         {
             // Armazena a posição atual do "Player 2"
@@ -18,7 +18,7 @@ public class SeguirUltimaPosicao2 : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Nenhum GameObject com a tag 'Player 2' foi encontrado.");
+            Debug.LogError("Nenhum GameObject com a tag 'Player 1' foi encontrado.");
         }
     }
 

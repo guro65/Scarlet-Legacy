@@ -42,28 +42,23 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        DetectarDefesa(); // Detecta se o jogador está defendendo
+        if (!estaVivo) return; // Impede a execução de lógica de movimento se o jogador estiver morto
+
+        DetectarDefesa();
         DetectarDuploToque();
         VerificarMovimento();
-        RotacaoContinua(); // Chamando o método para rotação contínua
-
-        // Atualiza a barra de vida
+        RotacaoContinua();
         AtualizarBarraVida();
-
-        // Debug para mostrar a vida atual em porcentagem
-        //Debug.Log($"Vida Atual: {VidaAtualPercentual}%");
     }
 
-    private void DetectarDefesa()
+   private void DetectarDefesa()
     {
-        // Verifica se a tecla "F" está sendo pressionada
         if (Input.GetKey(KeyCode.F))
         {
             if (!defendendo)
             {
                 defendendo = true;
                 animator.SetTrigger("Defender");
-                Debug.Log("Defesa ativada!");
             }
         }
         else
@@ -71,8 +66,7 @@ public class Player : MonoBehaviour
             if (defendendo)
             {
                 defendendo = false;
-                animator.SetBool("EstaParado", true); // Volta para a animação de parada
-                Debug.Log("Defesa desativada!");
+                animator.SetBool("EstaParado", true);
             }
         }
     }
@@ -80,7 +74,6 @@ public class Player : MonoBehaviour
 
     void DetectarDuploToque()
     {
-        // Detecção de duplo toque para cada direção
         DetectarTeclaDupla(KeyCode.W, ref ultimoToqueW, ref contadorToquesW, "RolarParaFrente");
         DetectarTeclaDupla(KeyCode.A, ref ultimoToqueA, ref contadorToquesA, "RolarParaEsquerda");
         DetectarTeclaDupla(KeyCode.S, ref ultimoToqueS, ref contadorToquesS, "RolarParaTras");
@@ -98,14 +91,12 @@ public class Player : MonoBehaviour
                 contadorToques++;
                 if (contadorToques == 2)
                 {
-                    // Aciona a animação correspondente
                     Rolar(animacao);
-                    contadorToques = 0; // Reseta o contador
+                    contadorToques = 0;
                 }
             }
             else
             {
-                // Reinicia o contador se o tempo exceder o intervalo
                 contadorToques = 1;
             }
 
@@ -117,19 +108,15 @@ public class Player : MonoBehaviour
     {
         if (animator != null)
         {
-            animator.SetBool(animacao, true); // Ativa a animação
-            StartCoroutine(DesativarRolagem(animacao)); // Desativa após um tempo
-        }
-        else
-        {
-            Debug.LogWarning("Animator não atribuído no script!");
+            animator.SetBool(animacao, true);
+            StartCoroutine(DesativarRolagem(animacao));
         }
     }
 
     IEnumerator DesativarRolagem(string animacao)
     {
-        yield return new WaitForSeconds(0.5f); // Tempo da animação de rolamento
-        animator.SetBool(animacao, false); // Desativa a animação
+        yield return new WaitForSeconds(0.5f);
+        animator.SetBool(animacao, false);
     }
 
     void VerificarMovimento()
@@ -137,20 +124,17 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.W))
         {
             animator.SetBool("Andar", true);
-            animator.SetBool("AndarParaTras", false);
-            Walk(1); // Anda para frente
+            Walk(1);
             animator.SetBool("EstaParado", false);
         }
         else if (Input.GetKey(KeyCode.S))
         {
             animator.SetBool("AndarParaTras", true);
-            animator.SetBool("Andar", false);
-            Walk(-1); // Anda para trás
+            Walk(-1);
         }
         else
         {
             animator.SetBool("Andar", false);
-            animator.SetBool("AndarParaTras", false);
             animator.SetBool("EstaParado", true);
         }
     }
@@ -159,21 +143,19 @@ public class Player : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.A))
         {
-            rotacaoAtual -= 90 * Time.deltaTime; // Decrementa a rotação
+            rotacaoAtual -= 90 * Time.deltaTime;
         }
         else if (Input.GetKey(KeyCode.D))
         {
-            rotacaoAtual += 90 * Time.deltaTime; // Incrementa a rotação
+            rotacaoAtual += 90 * Time.deltaTime;
         }
 
-        // Aplica a rotação suavemente no personagem
         Quaternion targetRotation = Quaternion.Euler(0, rotacaoAtual, 0);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * velocidadeRotacao);
     }
 
     private void Walk(float direcao)
     {
-        // A direção controla se o movimento será para frente (1) ou para trás (-1)
         float velocidadeMovimento = velocidade * direcao;
         Vector3 moveDirection = transform.forward * velocidadeMovimento;
         Vector3 novaPosicao = rb.position + moveDirection * Time.deltaTime;
@@ -193,7 +175,7 @@ public class Player : MonoBehaviour
     {
         if (barraVida != null)
         {
-            barraVida.fillAmount = VidaAtualPercentual / 100f; // A barra é uma porcentagem da vida
+            barraVida.fillAmount = VidaAtualPercentual / 100f;
         }
     }
 
@@ -208,9 +190,10 @@ public class Player : MonoBehaviour
 
     public void TomarDano(float dano)
     {
-        vidaAtual = Mathf.Max(vidaAtual - dano, 0); // Garante que a vida não fique abaixo de zero
-        AtualizarBarraVida(); // Atualiza a barra de vida
-        Debug.Log($"Tomou {dano} de dano! Vida atual: {VidaAtualPercentual}%");
+        if (!estaVivo) return;
+
+        vidaAtual = Mathf.Max(vidaAtual - dano, 0);
+        AtualizarBarraVida();
 
         if (vidaAtual <= 0)
         {
@@ -243,8 +226,25 @@ public class Player : MonoBehaviour
 
     private void Morrer()
     {
-        estaVivo = false;
-        animator.SetTrigger("Morte"); // Aciona a animação de morte, se existir
+        estaVivo = false; // Define que o jogador não está mais vivo
+        animator.SetTrigger("Morte"); // Ativa a animação de morte
+        rb.linearVelocity = Vector3.zero; // Para o movimento
+        animator.SetBool("EstaParado", true); // Assegura que o personagem fique parado
+
+        // Desabilita o movimento e qualquer outra ação
+        this.enabled = false;
+
+        // Inicia a corrotina para destruir o objeto após a animação de morte
+        StartCoroutine(AguardarDestruicao());
+    }
+
+    private IEnumerator AguardarDestruicao()
+    {
+        // Aguarda o tempo da animação de morte (substitua 2f pelo tempo correto da animação)
+        yield return new WaitForSeconds(2f);
+
+        // Destrói o GameObject após a animação
+        Destroy(gameObject);
     }
 
 }

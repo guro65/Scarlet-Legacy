@@ -8,10 +8,10 @@ public class Dano2 : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         // Verifica se o objeto que colidiu possui a tag "Player 2"
-        if (collision.gameObject.CompareTag("Player 2"))
+        if (collision.gameObject.CompareTag("Player 1"))
         {
             // Tenta obter o script Player do objeto que colidiu
-            Player2 playerScript = collision.gameObject.GetComponent<Player2>();
+            Player playerScript = collision.gameObject.GetComponent<Player>();
 
             if (playerScript != null)
             {
@@ -21,7 +21,7 @@ public class Dano2 : MonoBehaviour
             }
             else
             {
-                Debug.LogError("O GameObject com a tag 'Player 2' não possui o script 'Player'.");
+                Debug.LogError("O GameObject com a tag 'Player 1' não possui o script 'Player'.");
             }
         }
     }

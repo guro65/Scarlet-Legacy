@@ -9,7 +9,7 @@ public class SeguirUltimaPosicao : MonoBehaviour
     void Start()
     {
         // Encontra o GameObject com a tag "Player 1"
-        GameObject player = GameObject.FindGameObjectWithTag("Player 1");
+        GameObject player = GameObject.FindGameObjectWithTag("Player 2");
         if (player != null)
         {
             // Armazena a posição atual do "Player 1"
@@ -18,7 +18,7 @@ public class SeguirUltimaPosicao : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Nenhum GameObject com a tag 'Player 1' foi encontrado.");
+            Debug.LogError("Nenhum GameObject com a tag 'Player 2' foi encontrado.");
         }
     }
 
