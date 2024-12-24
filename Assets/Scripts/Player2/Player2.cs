@@ -23,9 +23,9 @@ public class Player2 : MonoBehaviour
 
 
     // Variáveis para detectar duplo toque
-    private float ultimoToqueW = -1f, ultimoToqueA = -1f, ultimoToqueS = -1f, ultimoToqueD = -1f;
+    private float ultimoToqueUpArrow = -1f, ultimoToqueLeftArrow = -1f, ultimoToqueRightArrow = -1f, ultimoToqueDownArrow = -1f;
     private float intervaloDuploToque = 0.5f; // Tempo máximo entre os toques
-    private int contadorToquesW = 0, contadorToquesA = 0, contadorToquesS = 0, contadorToquesD = 0;
+    private int contadorToquesUpArrow = 0, contadorToquesLeftArrow = 0, contadorToquesRightArrow = 0, contadorToquesDownArrow = 0;
 
     void Start()
     {
@@ -42,16 +42,13 @@ public class Player2 : MonoBehaviour
 
     void Update()
     {
-        DetectarDefesa(); // Detecta se o jogador está defendendo
+        if (!estaVivo) return; // Impede a execução de lógica de movimento se o jogador estiver morto
+
+        DetectarDefesa();
         DetectarDuploToque();
         VerificarMovimento();
-        RotacaoContinua(); // Chamando o método para rotação contínua
-
-        // Atualiza a barra de vida
+        RotacaoContinua();
         AtualizarBarraVida();
-
-        // Debug para mostrar a vida atual em porcentagem
-        //Debug.Log($"Vida Atual: {VidaAtualPercentual}%");
     }
     private void AtualizarBarraVida()
     {
@@ -89,10 +86,10 @@ public class Player2 : MonoBehaviour
     void DetectarDuploToque()
     {
         // Detecção de duplo toque para cada direção
-        DetectarTeclaDupla(KeyCode.W, ref ultimoToqueW, ref contadorToquesW, "RolarParaFrente");
-        DetectarTeclaDupla(KeyCode.A, ref ultimoToqueA, ref contadorToquesA, "RolarParaEsquerda");
-        DetectarTeclaDupla(KeyCode.S, ref ultimoToqueS, ref contadorToquesS, "RolarParaTras");
-        DetectarTeclaDupla(KeyCode.D, ref ultimoToqueD, ref contadorToquesD, "RolarParaDireita");
+        DetectarTeclaDupla(KeyCode.UpArrow, ref ultimoToqueUpArrow, ref contadorToquesUpArrow, "RolarParaFrente");
+        DetectarTeclaDupla(KeyCode.LeftArrow, ref ultimoToqueLeftArrow, ref contadorToquesLeftArrow, "RolarParaEsquerda");
+        DetectarTeclaDupla(KeyCode.RightArrow, ref ultimoToqueRightArrow, ref contadorToquesRightArrow, "RolarParaTras");
+        DetectarTeclaDupla(KeyCode.DownArrow, ref ultimoToqueDownArrow, ref contadorToquesDownArrow, "RolarParaDireita");
     }
 
     void DetectarTeclaDupla(KeyCode tecla, ref float ultimoToque, ref int contadorToques, string animacao)
@@ -142,14 +139,14 @@ public class Player2 : MonoBehaviour
 
     void VerificarMovimento()
     {
-        if (Input.GetKey(KeyCode.W))
+        if (Input.GetKey(KeyCode.UpArrow))
         {
             animator.SetBool("Andar", true);
             animator.SetBool("AndarParaTras", false);
             Walk(1); // Anda para frente
             animator.SetBool("EstaParado", false);
         }
-        else if (Input.GetKey(KeyCode.S))
+        else if (Input.GetKey(KeyCode.DownArrow))
         {
             animator.SetBool("AndarParaTras", true);
             animator.SetBool("Andar", false);
@@ -167,21 +164,19 @@ public class Player2 : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.A))
         {
-            rotacaoAtual -= 90 * Time.deltaTime; // Decrementa a rotação
+            rotacaoAtual -= 90 * Time.deltaTime;
         }
         else if (Input.GetKey(KeyCode.D))
         {
-            rotacaoAtual += 90 * Time.deltaTime; // Incrementa a rotação
+            rotacaoAtual += 90 * Time.deltaTime;
         }
 
-        // Aplica a rotação suavemente no personagem
         Quaternion targetRotation = Quaternion.Euler(0, rotacaoAtual, 0);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * velocidadeRotacao);
     }
 
     private void Walk(float direcao)
     {
-        // A direção controla se o movimento será para frente (1) ou para trás (-1)
         float velocidadeMovimento = velocidade * direcao;
         Vector3 moveDirection = transform.forward * velocidadeMovimento;
         Vector3 novaPosicao = rb.position + moveDirection * Time.deltaTime;
@@ -210,9 +205,10 @@ public class Player2 : MonoBehaviour
 
     public void TomarDano(float dano)
     {
-        vidaAtual = Mathf.Max(vidaAtual - dano, 0); // Garante que a vida não fique abaixo de zero
-        AtualizarBarraVida(); // Atualiza a barra de vida
-        Debug.Log($"Tomou {dano} de dano! Vida atual: {VidaAtualPercentual}%");
+        if (!estaVivo) return;
+
+        vidaAtual = Mathf.Max(vidaAtual - dano, 0);
+        AtualizarBarraVida();
 
         if (vidaAtual <= 0)
         {
@@ -245,8 +241,25 @@ public class Player2 : MonoBehaviour
 
     private void Morrer()
     {
-        estaVivo = false;
-        animator.SetTrigger("Morte"); // Aciona a animação de morte, se existir
+        estaVivo = false; // Define que o jogador não está mais vivo
+        animator.SetTrigger("Morte"); // Ativa a animação de morte
+        rb.linearVelocity = Vector3.zero; // Para o movimento
+        animator.SetBool("EstaParado", true); // Assegura que o personagem fique parado
+
+        // Desabilita o movimento e qualquer outra ação
+        this.enabled = false;
+
+        // Inicia a corrotina para destruir o objeto após a animação de morte
+        StartCoroutine(AguardarDestruicao());
+    }
+
+    private IEnumerator AguardarDestruicao()
+    {
+        // Aguarda o tempo da animação de morte (substitua 2f pelo tempo correto da animação)
+        yield return new WaitForSeconds(2f);
+
+        // Destrói o GameObject após a animação
+        Destroy(gameObject);
     }
 
 }
