@@ -11,7 +11,7 @@ public class Dano2 : MonoBehaviour
         if (collision.gameObject.CompareTag("Player 2"))
         {
             // Tenta obter o script Player do objeto que colidiu
-            Player playerScript = collision.gameObject.GetComponent<Player>();
+            Player2 playerScript = collision.gameObject.GetComponent<Player2>();
 
             if (playerScript != null)
             {
