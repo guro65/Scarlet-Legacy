@@ -139,12 +139,19 @@ public class Combate : MonoBehaviour
             }
         }
 
+        // Regenera a vida do Player, se a habilidade tiver uma porcentagem de regeneração configurada
+        if (habilidade.porcentagemRegeneracao > 0)
+        {
+            RegenerarVida(habilidade.porcentagemRegeneracao);
+        }
+
         StartCoroutine(AtualizarCooldownVisual(habilidade.cooldownImagem, habilidade.cooldownTempo));
         // Aguarda o tempo de cooldown
         yield return new WaitForSeconds(habilidade.cooldownTempo);
         // Habilidade está disponível novamente
         habilidadesDisponiveis[indice] = true;
     }
+
 
 
     private Vector3 DeterminarPosicaoSpawn(PontoSpawn pontoSpawn)
@@ -175,6 +182,7 @@ public class Combate : MonoBehaviour
             Debug.Log($"Regenerou {vidaParaRegenerar} de vida!");
         }
     }
+
 
     private void GerarPersonagemComHabilidades()
     {
