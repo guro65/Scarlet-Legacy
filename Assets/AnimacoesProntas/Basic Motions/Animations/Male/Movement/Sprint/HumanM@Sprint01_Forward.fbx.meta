@@ -2,6 +2,13 @@ fileFormatVersion: 2
 guid: 357a014fc50a6ae4aa9ea8347010fb60
 labels:
 - Animation
+AssetOrigin:
+  serializedVersion: 1
+  productId: 154271
+  packageName: Basic Motions FREE
+  packageVersion: 2.3
+  assetPath: Assets/Kevin Iglesias/Basic Motions/Animations/Male/Movement/Sprint/HumanM@Sprint01_Forward.fbx
+  uploadId: 712473
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -18,8 +25,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 0
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -47,7 +52,7 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
+      loopBlend: 1
       loopBlendOrientation: 1
       loopBlendPositionY: 1
       loopBlendPositionXZ: 1
@@ -827,8 +832,7 @@ ModelImporter:
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
-  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 0e1e29b35a3700748811d120b13ed8d6,
-    type: 3}
+  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 0e1e29b35a3700748811d120b13ed8d6, type: 3}
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 3
   humanoidOversampling: 1
@@ -840,10 +844,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 154271
-  packageName: Basic Motions FREE
-  packageVersion: 2.3
-  assetPath: Assets/Kevin Iglesias/Basic Motions/Animations/Male/Movement/Sprint/HumanM@Sprint01_Forward.fbx
-  uploadId: 712473
