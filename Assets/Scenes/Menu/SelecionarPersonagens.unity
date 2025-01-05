@@ -631,7 +631,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 219b9cb05f0a9a242a4ac4c4b0b9be7a, type: 2}
   m_CullingMode: 0
@@ -3116,7 +3116,7 @@ RectTransform:
   m_GameObject: {fileID: 1886291511}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.46, y: 1.46, z: 1.46}
+  m_LocalScale: {x: 1.6206001, y: 1.6206001, z: 1.6206001}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1486091206}
@@ -3146,7 +3146,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 9b0c6532dcde43142930fbfb58a8edf5, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6a08aac34b1d50b43900ecaac55ece2f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3176,7 +3176,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c4a9a3dadcb76741a66aca5b94b4d5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefab: {fileID: 0}
+  prefab: {fileID: 1608006758472801335, guid: 7edba2e7ce4000f4faccb5027dceb085, type: 3}
   spawnPoint: {fileID: 2094327616}
 --- !u!114 &1886291517
 MonoBehaviour:
@@ -3190,7 +3190,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: befb134274742414a8b771ba88215c20, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefab: {fileID: 3641535864105032168, guid: 5e3b6a05d7f3f1a4e8e17b2ef8510c55, type: 3}
+  prefab: {fileID: 1608006758472801335, guid: 7edba2e7ce4000f4faccb5027dceb085, type: 3}
   spawnPoint: {fileID: 2094327616}
   destroyOnExit: 1
 --- !u!1 &2094327614
